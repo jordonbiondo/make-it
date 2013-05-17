@@ -46,6 +46,30 @@
 ;;
 ;;; Code:
 
+(defun makeit/get-targets()
+  (interactive)
+  (let ((makefile (concat (file-name-directory buffer-file-name) "/makefile"))
+	(targets '()))
+    (if (file-exists-p makefile)
+	(with-temp-buffer
+	  (insert-file-contents makefile)
+	  (beginning-of-buffer)
+	  (while (search-forward-regexp "^\\([a-zA-Z_-]+\\):" nil t)
+	    (forward-word -1)
+	    (setq targets (append targets (list (word-at-point))))
+	    (forward-word 1)))
+      (print "no file"))
+    targets))
+
+(defun makeit/interactive(arg)
+  (interactive
+   (list (completing-read "make: " (makeit/get-targets) nil t nil nil "asd")))
+  (if (listp arg) (setq arg (car arg))) ;; older emacs support
+  (compile (concat "make " arg)))
+
+
+		    
+
 
 
 (provide 'make-it)
